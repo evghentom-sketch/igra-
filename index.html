@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новогодний Крокодил</title>
+    <link href="https://fonts.googleapis.com/css2?family=Festive&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom, #001f3f, #0074d9); /* Новогодний градиент: темный синий к светлому */
+            font-family: 'Festive', cursive;
+            text-align: center;
+            color: #fff;
+            margin: 0;
+            padding: 10px;
+            overflow: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #ffd700; /* Золотой цвет */
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            font-size: 2.5em;
+            margin: 10px 0;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            to { text-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+        }
+        p {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        #character-select {
+            margin: 20px 0;
+        }
+        #character-select label {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        #characters {
+            padding: 10px;
+            font-size: 1.2em;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        #characters:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        #canvas-container {
+            position: relative;
+            display: block;
+            margin: 0 auto;
+            border: 5px solid #228b22;
+            border-radius: 15px;
+            background-color: #fff;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: crosshair;
+            touch-action: none; /* Для мобильных */
+        }
+        .sticker {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            cursor: move;
+            transition: transform 0.2s ease;
+            animation: bounce 1s infinite alternate;
+        }
+        .sticker:hover {
+            transform: scale(1.1);
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+        #tools {
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 5px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #ff4500;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+        }
+        button:hover {
+            background-color: #ff6347;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 69, 0, 1);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        /* Увеличенные снежинки с вариациями */
+        .snowflake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fall linear infinite, sway 2s ease-in-out infinite alternate;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(120vh);
+            }
+        }
+        @keyframes sway {
+            from { transform: translateX(-10px); }
+            to { transform: translateX(10px); }
+        }
+        /* Мигающие огни */
+        .light {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: yellow;
+            border-radius: 50%;
+            box-shadow: 0 0 10px yellow;
+            animation: twinkle 1.5s infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        /* Медиа-запросы для мобильных */
+        @media (max-width: 600px) {
+            h1 { font-size: 2em; }
+            p { font-size: 1em; }
+            #characters { font-size: 1em; }
+            button { font-size: 1em; padding: 10px 20px; }
+            .sticker { width: 50px; height: 50px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Новогодний Крокодил: Рисуй и Угадывай!</h1>
+    <p>Выбери персонажа с уникальными способностями и рисуй новогодние слова. Другие игроки угадывают!</p>
+    
+    <div id="character-select">
+        <label for="characters">Выбери персонажа:</label>
+        <select id="characters">
+            <option value="zhenya">Женя (Красная кисть - для ярких фейерверков)</option>
+            <option value="sanya">Саня (Синяя кисть - для снежных тем)</option>
+            <option value="dimon">Димон (Зеленая кисть - для елочек)</option>
+            <option value="sasha">Саша (Толстая кисть - для больших фигур)</option>
+            <option value="kristina">Кристина (Добавляй стикеры - новогодние фигурки)</option>
+        </select>
+    </div>
+    
+    <div id="canvas-container">
+        <canvas id="drawing-canvas"></canvas>
+        <!-- Новогодние фигурки как стикеры с новыми изображениями -->
+        <img class="sticker" id="sticker1" src="https://www.shutterstock.com/image-vector/merry-christmas-happy-new-year-260nw-2533593457.jpg" style="display:none;">
+        <img class="sticker" id="sticker2" src="https://thumbs.dreamstime.com/b/merry-christmas-holiday-vector-santa-snowman-tree-gifts-festive-lights-perfect-greeting-cards-banners-cheerful-flat-396132838.jpg" style="display:none;">
+        <img class="sticker" id="sticker3" src="https://media.istockphoto.com/id/1441611131/vector/set-of-christmas-and-new-year-elements-on-a-beige-background-christmas-tree-santa-claus.jpg?s=612x612&w=0&k=20&c=ZwTIuElxlaJAx1HAMNsM9ldwFLjEgGNOLQAucRpRQPY=" style="display:none;">
+        <img class="sticker" id="sticker4" src="https://thumbs.dreamstime.com/b/festive-illustration-captures-six-joyous-snowmen-celebrating-arrival-sparkling-winter-night-hold-colorful-415702970.jpg" style="display:none;">
+        <img class="sticker" id="sticker5" src="https://www.shutterstock.com/image-vector/christmas-background-santa-claus-snowman-260nw-2517853857.jpg" style="display:none;">
+    </div>
+    
+    <div id="tools">
+        <button id="clear-btn">Очистить</button>
+        <button id="add-sticker-btn" style="display:none;">Добавить стикер</button>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let currentCharacter = 'zhenya';
+        let brushColor = '#ff0000';
+        let brushSize = 5;
+        let lastX = 0;
+        let lastY = 0;
+        
+        // Адаптация размера canvas
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetWidth * 0.75; // Соотношение 4:3
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        // Выбор персонажа
+        document.getElementById('characters').addEventListener('change', (e) => {
+            currentCharacter = e.target.value;
+            switch (currentCharacter) {
+                case 'zhenya': brushColor = '#ff0000'; brushSize = 5; hideStickerBtn(); break;
+                case 'sanya': brushColor = '#0000ff'; brushSize = 5; hideStickerBtn(); break;
+                case 'dimon': brushColor = '#008000'; brushSize = 5; hideStickerBtn(); break;
+                case 'sasha': brushColor = '#000000'; brushSize = 10; hideStickerBtn(); break;
+                case 'kristina': brushColor = '#ff69b4'; brushSize = 5; showStickerBtn(); break;
+            }
+        });
+        function hideStickerBtn() { document.getElementById('add-sticker-btn').style.display = 'none'; }
+        function showStickerBtn() { document.getElementById('add-sticker-btn').style.display = 'inline-block'; }
+        
+        // Рисование (мышь и тач)
+        function startDrawing(e) {
+            drawing = true;
+            [lastX, lastY] = getCoords(e);
+            ctx.beginPath();
+        }
+        function endDrawing() {
+            drawing = false;
+        }
+        function draw(e) {
+            if (!drawing) return;
+            e.preventDefault();
+            const [x, y] = getCoords(e);
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = brushColor;
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            [lastX, lastY] = [x, y];
+        }
+        function getCoords(e) {
+            if (e.touches) {
+                return [e.touches[0].clientX - canvas.offsetLeft, e.touches[0].clientY - canvas.offsetTop];
+            }
+            return [e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop];
+        }
+        
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', endDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchend', endDrawing);
+        canvas.addEventListener('touchmove', draw);
+        
+        // Очистить
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.querySelectorAll('.sticker').forEach(sticker => sticker.style.display = 'none');
+        });
+        
+        // Добавление стикера
+        let stickerIndex = 1;
+        document.getElementById('add-sticker-btn').addEventListener('click', () => {
+            const sticker = document.getElementById(`sticker${stickerIndex}`);
+            sticker.style.display = 'block';
+            sticker.style.left = `${Math.random() * (canvas.width - 60)}px`;
+            sticker.style.top = `${Math.random() * (canvas.height - 60)}px`;
+            makeDraggable(sticker);
+            stickerIndex = (stickerIndex % 5) + 1;
+        });
+        
+        // Drag для стикеров (мышь и тач)
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            element.addEventListener('mousedown', dragMouseDown);
+            element.addEventListener('touchstart', dragMouseDown);
+            
+            function dragMouseDown(e) {
+                e.preventDefault();
+                const touch = e.touches ? e.touches[0] : e;
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+                document.addEventListener('mouseup', closeDragElement);
+                document.addEventListener('mousemove', elementDrag);
+                document.addEventListener('touchend', closeDragElement);
+                document.addEventListener('touchmove', elementDrag);
+            }
+            
+            function elementDrag(e) {
+                e.preventDefault();
+                const touch = e.touches ? e.touches[0] : e;
+                pos1 = pos3 - touch.clientX;
+                pos2 = pos4 - touch.clientY;
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+            
+            function closeDragElement() {
+                document.removeEventListener('mouseup', closeDragElement);
+                document.removeEventListener('mousemove', elementDrag);
+                document.removeEventListener('touchend', closeDragElement);
+                document.removeEventListener('touchmove', elementDrag);
+            }
+        }
+        
+        // Снежинки (больше и вариативно)
+        function createSnowflakes(count) {
+            for (let i = 0; i < count; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                const size = Math.random() * 8 + 4;
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                snowflake.style.left = `${Math.random() * 100}vw`;
+                snowflake.style.top = `-${Math.random() * 100}px`;
+                snowflake.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                snowflake.style.animationDelay = `${Math.random() * 5}s`;
+                snowflake.style.opacity = Math.random() * 0.5 + 0.5;
+                document.body.appendChild(snowflake);
+            }
+        }
+        createSnowflakes(100); // Больше снежинок
+        
+        // Мигающие огни
+        function createLights(count) {
+            for (let i = 0; i < count; i++) {
+                const light = document.createElement('div');
+                light.className = 'light';
+                light.style.left = `${Math.random() * 100}vw`;
+                light.style.top = `${Math.random() * 100}vh`;
+                light.style.background = ['red', 'green', 'blue', 'yellow'][Math.floor(Math.random() * 4)];
+                light.style.animationDelay = `${Math.random() * 2}s`;
+                document.body.appendChild(light);
+            }
+        }
+        createLights(50); // 50 огней
+    </script>
+</body>
+</html>
